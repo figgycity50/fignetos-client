@@ -1,0 +1,18 @@
+--SVRRUN
+tArgs = ...
+print("Type the server's Master Password:")
+mpass = read("*")
+print("Sending password and command to server...")
+modem = peripheral.wrap("top")
+modem.open(66)
+modem.open(67)
+modem.open(68)
+modem.open(69)
+modem.transmit(66,68, mpass.." "..tArgs)
+print("Waiting for response...")
+local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+if message == "done" then
+	print("The server has run the command successfully.")
+else
+	print("Wrong password.")
+end

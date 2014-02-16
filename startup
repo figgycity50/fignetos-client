@@ -1,0 +1,66 @@
+--CLIENT
+--hey dude, dont ctrl t past teh login plz!
+os.pullEvent = os.pullEventRaw
+term.clear()
+os.version = function()
+	print("FigNetOS Client 1.0")
+end
+os.version()
+while true do
+write("Login: ")
+username = read()
+print("")
+write("Password: ")
+password = read("*")
+modem = peripheral.wrap("top")
+if modem == nil then
+	print("ERROR: No connection can be established! Shutting down...")
+	wait(1)
+	os.shutdown()
+end
+modem.open(66)
+modem.open(67)
+modem.open(68)
+modem.open(69)
+print("Sending server login info...")
+modem.transmit(66,67, "login "..username.." "..password)
+print("Waiting for response...")
+local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+if message == username.." good" then
+	print("Login successful!")
+	print("Trying to sync your files to /docs...")
+	modem.transmit(66,67, "rls docs/"..username)
+	local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+	files = textutils.unserialize(message)
+	for _, file in pairs(files) do
+		modem.transmit(66,67, "rdl docs/"..username.."/"..file)
+		local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+		fsFile = fs.open("docs/"..username.."/"..file, "w")
+		fsFile.write(message)
+		fsFile.close()
+	end
+	shell.run("shell")
+	print("Trying to sync your files to /docs...")
+	modem.transmit(66,67, "rls docs/"..username)
+	local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+	files = textutils.unserialize(message)
+	for _, file in pairs(files) do
+		fsFile = fs.open("docs/"..username.."/"..file, "r")
+		transmit = fsFile.readAll()
+		fsFile.close()
+		modem.transmit(66,67, "rup docs/"..username.."/"..file.." "..transmit)
+		local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+		if message == "done" then
+			print("Filesync done.")
+
+		else
+			print("Filesync error, you may lose data.")
+	end
+end
+else
+	print(message)
+	print("Invalid login. Try again.")
+	sleep(3)
+	os.reboot()
+end
+end
