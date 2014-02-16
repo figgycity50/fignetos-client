@@ -29,6 +29,9 @@ local event, modemSide, senderChannel, replyChannel, message, senderDistance = o
 if message == username.." good" then
 	print("Login successful!")
 	print("Trying to sync your files to /docs...")
+	if not fs.exists("docs/"..username) then
+		fs.makeDir("docs/"..username)
+	end
 	modem.transmit(66,67, "rls docs/"..username)
 	local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
 	files = textutils.unserialize(message)
