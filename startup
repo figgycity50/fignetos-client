@@ -44,9 +44,7 @@ if message == username.." good" then
 	end
 	shell.run("shell")
 	print("Trying to sync your files to /docs...")
-	modem.transmit(66,67, "rls docs/"..username)
-	local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
-	files = textutils.unserialize(message)
+	files = fs.list("docs/"..username)
 	for _, file in pairs(files) do
 		fsFile = fs.open("docs/"..username.."/"..file, "r")
 		transmit = fsFile.readAll()
